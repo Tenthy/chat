@@ -13,21 +13,10 @@ import java.net.Socket;
 
 public class EchoClient extends JFrame {
 
-    private JPanel contentPane;
-
     private JTextArea messageTextArea;
-
-    private JPanel messagePanel;
-    private JButton sendButton;
     private JTextField messageTextField;
-
-    private JPanel loginPanel;
-
-    private JPanel loginPasswordPanel;
     private JTextField loginTextField;
     private JTextField passwordTextField;
-    private JPanel loginButtonPanel;
-    private JButton loginButton;
 
     private Socket socket;
     private DataInputStream dataInputStream;
@@ -102,7 +91,7 @@ public class EchoClient extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         getRootPane().setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
 
-        contentPane = new JPanel();
+        JPanel contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout(0, 0));
         add(contentPane);
         messageTextArea = new JTextArea();
@@ -110,29 +99,29 @@ public class EchoClient extends JFrame {
         messageTextArea.setLineWrap(true);
         contentPane.add(new JScrollPane(messageTextArea), BorderLayout.CENTER);
 
-        messagePanel = new JPanel();
+        JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new BorderLayout(0, 0));
         contentPane.add(messagePanel, BorderLayout.SOUTH);
         messageTextField = new JTextField();
         messagePanel.add(messageTextField, BorderLayout.CENTER);
-        sendButton = new JButton();
+        JButton sendButton = new JButton();
         sendButton.setText("Send");
         messagePanel.add(sendButton, BorderLayout.EAST);
 
-        loginPanel = new JPanel();
+        JPanel loginPanel = new JPanel();
         loginPanel.setLayout(new BorderLayout(0, 0));
         contentPane.add(loginPanel, BorderLayout.NORTH);
-        loginPasswordPanel = new JPanel();
+        JPanel loginPasswordPanel = new JPanel();
         loginPasswordPanel.setLayout(new BorderLayout(0, 0));
         loginPanel.add(loginPasswordPanel, BorderLayout.CENTER);
         loginTextField = new JTextField();
         loginPasswordPanel.add(loginTextField, BorderLayout.NORTH);
         passwordTextField = new JTextField();
         loginPasswordPanel.add(passwordTextField, BorderLayout.SOUTH);
-        loginButtonPanel = new JPanel();
+        JPanel loginButtonPanel = new JPanel();
         loginButtonPanel.setLayout(new BorderLayout(0, 0));
         loginPanel.add(loginButtonPanel, BorderLayout.EAST);
-        loginButton = new JButton();
+        JButton loginButton = new JButton();
         loginButton.setText("Login");
         loginButtonPanel.add(loginButton, BorderLayout.NORTH);
 
