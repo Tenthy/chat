@@ -1,8 +1,5 @@
 package server;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
 public class SQLBaseAuthService implements AuthService{
 
@@ -39,10 +36,10 @@ public class SQLBaseAuthService implements AuthService{
     }
 
     @Override
-    public String getNickByLoginAndPass(String login, String pass) {
+    public String getNickByLoginAndPass(String login, String password) {
         try (ResultSet rs = statement.executeQuery("select * from users")) {
             while (rs.next()) {
-                if (login.equals(rs.getString("login")) && pass.equals(rs.getString("password"))) {
+                if (login.equals(rs.getString("login")) && password.equals(rs.getString("password"))) {
                     return rs.getString("nickname");
                 };
             }
@@ -50,5 +47,16 @@ public class SQLBaseAuthService implements AuthService{
             ex.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public String setNickname(String newNickname, String oldNickname, String login, String password) {
+        try {
+            statement.executeUpdate("update users set nickname='" + newNickname +
+                    "' where nickname='" + oldNickname + "'");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return getNickByLoginAndPass(login, password);
     }
 }

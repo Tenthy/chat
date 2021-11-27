@@ -19,6 +19,8 @@ public class ClientHandler {
     private DataOutputStream outputStream;
     private DataInputStream inputStream;
     private String nickname;
+    private String login;
+    private String password;
 
     public String getNickname() {
         return nickname;
@@ -49,7 +51,9 @@ public class ClientHandler {
         while (true) {
             String loginAndPassword = inputStream.readUTF();
             String[] tokens = loginAndPassword.split("\\s+");
-            String tempNickname = server.getAuthService().getNickByLoginAndPass(tokens[0], tokens[1]);
+            login = tokens[0];
+            password = tokens[1];
+            String tempNickname = server.getAuthService().getNickByLoginAndPass(login, password);
             if (tempNickname != null) {
                 nickname = tempNickname;
                 sendMessage("Вы вошли в общий чат");
@@ -80,6 +84,14 @@ public class ClientHandler {
              */
             if (messageFromClient.equals(Constants.END_COMMAND)) {
                 break;
+            }
+
+            /**
+             * Для того чтобы сменить никнейм
+             */
+            if (messageFromClient.startsWith(Constants.SET_NICKNAME_COMMAND)) {
+                String[] tokens = messageFromClient.split("\\s+");
+                nickname = server.getAuthService().setNickname(tokens[1], nickname, login, password);
             }
 
             /**

@@ -13,4 +13,7 @@ public class Constants {
 
     //Команда для отправки личного сообщения
     public static final String W_COMMAND = "/w ";
+
+    //Команда для смены никнейма
+    public static final String SET_NICKNAME_COMMAND = "/setnick ";
 }
