@@ -23,4 +23,14 @@ public interface AuthService {
      * @return никнейм если найден или null, если такого нет
      */
     String getNickByLoginAndPass(String login, String password);
+
+    /**
+     * Сменить никнейм
+     *
+     * @param password
+     * @param login
+     * @param oldNickname
+     * @param newNickname
+     */
+    String setNickname(String newNickname, String oldNickname, String login, String password);
 }
