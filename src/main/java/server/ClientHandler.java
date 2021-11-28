@@ -2,9 +2,7 @@ package server;
 
 import constants.Constants;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +19,10 @@ public class ClientHandler {
     private String nickname;
     private String login;
     private String password;
+
+    private File file;
+    private PrintWriter printWriter;
+    private BufferedReader bufferedReader = null;
 
     public String getNickname() {
         return nickname;
@@ -56,6 +58,33 @@ public class ClientHandler {
             String tempNickname = server.getAuthService().getNickByLoginAndPass(login, password);
             if (tempNickname != null) {
                 nickname = tempNickname;
+
+                /**
+                 * Запись истории чата в тексовой файл history_[login].txt
+                 */
+                try {
+                    file = new File("history_" + login + ".txt");
+                    if (!file.exists()) {
+                        file.createNewFile();
+                    }
+                    printWriter = new PrintWriter(file);
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+
+                /**
+                 * Вывод истории чата из текстового файла
+                 */
+                try {
+                    bufferedReader = new BufferedReader(new FileReader("history_" + login + ".txt"));
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        sendMessage(line);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 sendMessage("Вы вошли в общий чат");
                 server.broadcastMessage(nickname + " вошёл в чат");
                 server.subscribe(this);
@@ -69,6 +98,22 @@ public class ClientHandler {
     public void sendMessage(String message) {
         try {
             outputStream.writeUTF(message);
+
+            /**
+             * Запись истории чата в тексовой файл history_[login].txt
+             */
+            printWriter.write(message + "\n");
+
+            /*
+            Этот способ тоже работает, но мне он показался неправильным с логической точки
+
+            try (FileWriter fileWriter = new FileWriter("history_" + login + ".txt", true)) {
+                fileWriter.write(message + " \n");
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+             */
+
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -114,6 +159,7 @@ public class ClientHandler {
     }
 
     private void closeConnection() {
+        printWriter.close();
         server.unsubscribe(this);
         server.broadcastMessage(nickname + " вышел из чата");
         try {

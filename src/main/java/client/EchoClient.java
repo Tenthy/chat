@@ -81,7 +81,7 @@ public class EchoClient extends JFrame {
             messageTextField.setText("");
             messageTextField.grabFocus();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            messageTextArea.append("Ошибка: Вы не авторизовались");
         }
     }
 
