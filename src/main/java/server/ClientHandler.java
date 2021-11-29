@@ -19,9 +19,10 @@ public class ClientHandler {
     private String nickname;
     private String login;
     private String password;
+    private final int MAX_LINES_IN_HISTORYLOG = 100;
 
     private File file;
-    private PrintWriter printWriter;
+    private BufferedWriter bufferedWriter;
     private BufferedReader bufferedReader = null;
 
     public String getNickname() {
@@ -63,11 +64,7 @@ public class ClientHandler {
                  * Запись истории чата в тексовой файл history_[login].txt
                  */
                 try {
-                    file = new File("history_" + login + ".txt");
-                    if (!file.exists()) {
-                        file.createNewFile();
-                    }
-                    printWriter = new PrintWriter(file);
+                    bufferedWriter = new BufferedWriter(new FileWriter("history_" + login + ".txt", true));
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
@@ -79,11 +76,12 @@ public class ClientHandler {
                     bufferedReader = new BufferedReader(new FileReader("history_" + login + ".txt"));
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
-                        sendMessage(line);
+                        outputStream.writeUTF(line);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                bufferedReader.close();
 
                 sendMessage("Вы вошли в общий чат");
                 server.broadcastMessage(nickname + " вошёл в чат");
@@ -96,24 +94,17 @@ public class ClientHandler {
     }
 
     public void sendMessage(String message) {
+        /**
+         * Запись истории чата в тексовой файл history_[login].txt
+         */
+        try {
+            bufferedWriter.write(message + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         try {
             outputStream.writeUTF(message);
-
-            /**
-             * Запись истории чата в тексовой файл history_[login].txt
-             */
-            printWriter.write(message + "\n");
-
-            /*
-            Этот способ тоже работает, но мне он показался неправильным с логической точки
-
-            try (FileWriter fileWriter = new FileWriter("history_" + login + ".txt", true)) {
-                fileWriter.write(message + " \n");
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-             */
-
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
@@ -159,7 +150,11 @@ public class ClientHandler {
     }
 
     private void closeConnection() {
-        printWriter.close();
+        try {
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         server.unsubscribe(this);
         server.broadcastMessage(nickname + " вышел из чата");
         try {
