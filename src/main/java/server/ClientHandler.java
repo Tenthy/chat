@@ -2,11 +2,13 @@ package server;
 
 import constants.Constants;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,6 +23,11 @@ public class ClientHandler {
     private String nickname;
     private String login;
     private String password;
+    private final int MAX_LINES_ON_HISTORYLOG = 100;
+
+    private File file;
+    private BufferedWriter bufferedWriter;
+    private BufferedReader bufferedReader = null;
 
     public String getNickname() {
         return nickname;
@@ -56,6 +63,37 @@ public class ClientHandler {
             String tempNickname = server.getAuthService().getNickByLoginAndPass(login, password);
             if (tempNickname != null) {
                 nickname = tempNickname;
+
+                file = new File("history_" + login + ".txt");
+                try {
+                    changeHistoryLog();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                /**
+                 * Запись истории чата в тексовой файл history_[login].txt
+                 */
+                try {
+                    bufferedWriter = new BufferedWriter(new FileWriter(file, true));
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+
+                /**
+                 * Вывод истории чата из текстового файла
+                 */
+                try {
+                    bufferedReader = new BufferedReader(new FileReader(file));
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        outputStream.writeUTF(line);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                bufferedReader.close();
+
                 sendMessage("Вы вошли в общий чат");
                 server.broadcastMessage(nickname + " вошёл в чат");
                 server.subscribe(this);
@@ -66,7 +104,34 @@ public class ClientHandler {
         }
     }
 
+    /**
+     * Для перезаписи истории чата с ограничением в 100 строк
+     * @throws Exception
+     */
+    public void changeHistoryLog() throws Exception {
+        List<String> listHistoryLog = new ArrayList<>();
+        Files.lines(Paths.get(String.valueOf(file))).forEach(listHistoryLog::add);
+        System.out.println(listHistoryLog.size());
+        if (listHistoryLog.size() >= MAX_LINES_ON_HISTORYLOG) {
+            bufferedWriter = new BufferedWriter(new FileWriter(file));
+            bufferedWriter.write("");
+            for (int i = listHistoryLog.size() - MAX_LINES_ON_HISTORYLOG; i < listHistoryLog.size(); i++) {
+                bufferedWriter.write(listHistoryLog.get(i) + "\n");
+            }
+            bufferedWriter.close();
+        }
+    }
+
     public void sendMessage(String message) {
+        /**
+         * Запись истории чата в тексовой файл history_[login].txt
+         */
+        try {
+            bufferedWriter.write(message + "\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         try {
             outputStream.writeUTF(message);
         } catch (IOException ioe) {
@@ -114,6 +179,11 @@ public class ClientHandler {
     }
 
     private void closeConnection() {
+        try {
+            bufferedWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         server.unsubscribe(this);
         server.broadcastMessage(nickname + " вышел из чата");
         try {

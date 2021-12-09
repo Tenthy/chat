@@ -42,8 +42,7 @@ public class EchoClient extends JFrame {
                     if (messageFromServer.equals("/end")) {
                         break;
                     }
-                    messageTextArea.append(messageFromServer);
-                    messageTextArea.append("\n");
+                    messageTextArea.append(messageFromServer + "\n");
                 }
                 messageTextArea.append("Соединение разорвано");
                 messageTextField.setEnabled(false);
@@ -81,7 +80,7 @@ public class EchoClient extends JFrame {
             messageTextField.setText("");
             messageTextField.grabFocus();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            messageTextArea.append("Ошибка: Вы не авторизовались");
         }
     }
 
