@@ -10,6 +10,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Обработчик для конкретного клиента
@@ -23,6 +26,7 @@ public class ClientHandler {
     private String nickname;
     private String login;
     private String password;
+    private ExecutorService executorService = Executors.newCachedThreadPool();
     private final int MAX_LINES_ON_HISTORYLOG = 100;
 
     private File file;
@@ -39,7 +43,7 @@ public class ClientHandler {
             this.socket = socket;
             this.inputStream = new DataInputStream(socket.getInputStream());
             this.outputStream = new DataOutputStream(socket.getOutputStream());
-            new Thread(() -> {
+            executorService.execute(() -> {
                 try {
                     authentication();
                     readMessage();
@@ -48,9 +52,11 @@ public class ClientHandler {
                 } finally {
                     closeConnection();
                 }
-            }).start();
+            });
         } catch (IOException ioe) {
             throw new RuntimeException("Проблемы при создании обработчика");
+        } finally {
+            executorService.shutdown();
         }
     }
 
