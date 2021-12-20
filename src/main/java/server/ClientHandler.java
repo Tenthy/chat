@@ -117,7 +117,6 @@ public class ClientHandler {
     public void changeHistoryLog() throws Exception {
         List<String> listHistoryLog = new ArrayList<>();
         Files.lines(Paths.get(String.valueOf(file))).forEach(listHistoryLog::add);
-        System.out.println(listHistoryLog.size());
         if (listHistoryLog.size() >= MAX_LINES_ON_HISTORYLOG) {
             bufferedWriter = new BufferedWriter(new FileWriter(file));
             bufferedWriter.write("");
@@ -148,7 +147,7 @@ public class ClientHandler {
     private void readMessage() throws IOException {
         while (true) {
             String messageFromClient = inputStream.readUTF();
-            System.out.println("Сообщение от " + nickname + ": " + messageFromClient);
+            EchoServer.logger.info("Сообщение от " + nickname + ": " + messageFromClient);
 
             /**
              * Для того чтобы закрыть чат
@@ -162,6 +161,7 @@ public class ClientHandler {
              */
             if (messageFromClient.startsWith(Constants.SET_NICKNAME_COMMAND)) {
                 String[] tokens = messageFromClient.split("\\s+");
+                EchoServer.logger.info(nickname + " сменил никнейм на " + tokens[1]);
                 nickname = server.getAuthService().setNickname(tokens[1], nickname, login, password);
             }
 
