@@ -145,7 +145,7 @@ public class ClientHandler {
     }
 
     private void readMessage() throws IOException {
-        while (true) {
+          while (true) {
             String messageFromClient = inputStream.readUTF();
             EchoServer.logger.info("Сообщение от " + nickname + ": " + messageFromClient);
 
